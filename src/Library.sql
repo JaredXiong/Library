@@ -18,7 +18,7 @@ CREATE TABLE student
 (
     sName VARCHAR(255),
     sID VARCHAR(255) NOT NULL PRIMARY KEY ,
-    borrower INT,#借阅数量
+    borrowed INT,#借阅数量
     Password VARCHAR(255) NOT NULL
 
 );
@@ -41,4 +41,11 @@ CREATE TABLE borrow
     FOREIGN KEY (bID) REFERENCES student(sID)
 
 );
+
+INSERT INTO student VALUE('张三','123456',1,123456);
+
+INSERT INTO book VALUE('9787508678498','历史的温度','张玮','中信出版社','历史1-1',0),
+    ('9787115293800','算法','Robert Sedgewick/Kevin Wayne','人民邮电出版社','计算机',1)
+;
+INSERT INTO borrow VALUE('9787115293800','123456','2024-12-10');
 
