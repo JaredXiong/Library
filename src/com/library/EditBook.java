@@ -1,5 +1,6 @@
 package com.library;
 
+import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -100,30 +101,55 @@ public interface EditBook extends ActionListener {
     }
 
     default String[][] queryBook(Connection conn,String isbn, String bName, String bAuthor, String bPress) throws Exception {
-
+        String[][] books;
         StringBuilder sql =new StringBuilder();
 
         sql.append("select * from book");
 
-        if (isbn!=null && !isbn.isEmpty()){
-            sql.append(" and isbn = %?%");
+        if (isbn != null && !isbn.isEmpty()) {
+            if (String.valueOf(sql).equals("select * from book")) sql.append(" where");
+            else sql.append(" and");
+            sql.append(" isbn like '%").append(isbn).append("%'");
         }
 
-        if (bName!=null && !bName.isEmpty()){
-            sql.append(" and bName = %?%");
+        if (bName != null && !bName.isEmpty()) {
+            if (String.valueOf(sql).equals("select * from book")) sql.append(" where");
+            else sql.append(" and");
+            sql.append(" bName like '%").append(bName).append("%'");
         }
 
-        if (bAuthor!=null && !bAuthor.isEmpty()){
-            sql.append(" and bAuthor = %?%");
+        if (bAuthor != null && !bAuthor.isEmpty()) {
+            if (String.valueOf(sql).equals("select * from book")) sql.append(" where");
+            else sql.append(" and");
+            sql.append(" bAuthor like '%").append(bAuthor).append("%'");
         }
 
-        if (bPress!=null && !bPress.isEmpty()){
-            sql.append(" and bPress = %?%");
+        if (bPress != null && !bPress.isEmpty()) {
+            if (String.valueOf(sql).equals("select * from book")) sql.append(" where");
+            else sql.append(" and");
+            sql.append(" bPress like '%").append(bPress).append("%'");
         }
         //对sql语句进行输出，查看是否正确
-        System.out.println("SQL-> 语句：" +sql);
+        System.out.println(String.valueOf(sql));
+        PreparedStatement ps = conn.prepareStatement(String.valueOf(sql), ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
+        ResultSet rs = ps.executeQuery();
+        rs.last();
+        int rsRow = rs.getRow();
+        books = new String[rsRow][6];
+        rs.beforeFirst();
+        int i = 0;
+        while (rs.next()) {
+            books[i][0] = rs.getString("isbn");
+            books[i][1] = rs.getString("bName");
+            books[i][2] = rs.getString("bAuthor");
+            books[i][3] = rs.getString("bPress");
+            books[i][4] = rs.getString("bLocation");
+            books[i][5] = rs.getString("isBorrowed").equals("1") ? "已借出" : "未借出";
+            i++;
+        }
 
-        PreparedStatement ps = conn.prepareStatement(String.valueOf(sql));
+        return books;
+
     }
 }

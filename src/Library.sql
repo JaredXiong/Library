@@ -49,3 +49,4 @@ INSERT INTO book VALUE('9787508678498','历史的温度','张玮','中信出版�
 ;
 INSERT INTO borrow VALUE('9787115293800','123456','2024-12-10');
 
+select * from book where bName like '%算%' ;

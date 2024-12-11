@@ -207,7 +207,23 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
             Connection conn = DriverManager.getConnection(url, user, password);
 
             if (e.getSource() == search) {
-                JOptionPane.showMessageDialog(null, "查询成功！", "查询", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
+                panel.remove(table);
+
+                books = queryBook(conn,ISBN.getText(), bookName.getText(), author.getText(), press.getText());
+                String[] bookInformation = {"书号","书名","作者","出版社","存放位置","借阅状态"};
+                System.out.println(books[0][0]);
+                JTable table3 = new JTable(books,bookInformation)
+                {public boolean isCellEditable(int row, int column) {
+                    return false;
+                }};
+                table3.updateUI();
+                table3.setFont(font);
+                table3.setRowHeight(25);
+                table3.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+                panel.remove(table3);
+                panel.add(table3).setBounds(5,130,777,450);
+                table3.revalidate();
+                table3.repaint();
             }
             if (e.getSource() == borrow) {
                 if (row != -1) {
@@ -285,6 +301,9 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
                     new LoginFrame().setVisible(true);
                 }
             }
+        } catch(java.lang.ArrayIndexOutOfBoundsException ae){
+            JOptionPane.showMessageDialog(null,"查询为空！","警告",JOptionPane.WARNING_MESSAGE);
+
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
