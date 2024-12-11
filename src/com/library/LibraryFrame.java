@@ -3,11 +3,12 @@ package com.library;
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.Arrays;
 
-public class LibraryFrame extends JFrame implements Login, ItemListener {
+public class LibraryFrame extends JFrame implements Login, EditBook, ItemListener {
     JMenuBar menuBar = new JMenuBar();
     JMenu book = new JMenu("图书操作");
     JMenu color = new JMenu("主题颜色");
@@ -16,12 +17,12 @@ public class LibraryFrame extends JFrame implements Login, ItemListener {
     JMenuItem returnBook = new JMenuItem("归还图书");
     JMenuItem bookBorrowed = new JMenuItem("已借图书");
     JMenuItem information = new JMenuItem("个人信息");
-    JMenuItem changePassword = new JMenuItem("修改信息");
+    JMenuItem changePassword = new JMenuItem("修改密码");
     JMenuItem red = new JRadioButtonMenuItem("Red",false);
     JMenuItem green = new JRadioButtonMenuItem("Green",false);
     JMenuItem blue = new JRadioButtonMenuItem("Blue",false);
     JMenuItem white = new JRadioButtonMenuItem("White",true);
-    JMenuItem FileExit = new JMenuItem("退出系统");
+    JMenuItem FileExit = new JMenuItem("注销");
     JTextField bookName = new JTextField(15);
     JTextField author = new JTextField(15);
     JTextField press = new JTextField(15);
@@ -40,8 +41,18 @@ public class LibraryFrame extends JFrame implements Login, ItemListener {
     Label l5 = new Label("排序方法：");
     JPanel panel = new JPanel();
     JTable table;
+    String sID;
+    int borrowedNo;
 
-    public LibraryFrame() {
+    JPanel panel2 = new JPanel();
+    Label l6 = new Label("已借图书");
+    JTable table2;
+    String[][] books;
+    int row = -1;
+
+    public LibraryFrame(String ID, int borrowed) throws Exception {
+        sID = ID;
+        borrowedNo = borrowed;
         this.setTitle("图书馆管理系统");
         this.setSize(800, 700);
         //又臭又长的设置格式
@@ -69,6 +80,7 @@ public class LibraryFrame extends JFrame implements Login, ItemListener {
         l3.setFont(font);
         l4.setFont(font);
         l5.setFont(font);
+        l6.setFont(font);
         //添加菜单栏
         menuBar.add(book);
         menuBar.add(color);
@@ -112,17 +124,43 @@ public class LibraryFrame extends JFrame implements Login, ItemListener {
         g2.add(bPress);
         g2.add(bISBN);
 
+        //获取数据
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String url = "jdbc:mysql://localhost:3306/library";
+        String user = "root";
+        String password = "123456";
+        Connection conn = DriverManager.getConnection(url, user, password);
+
         //设计数据表
         String[] bookInformation = {"书号","书名","作者","出版社","存放位置","借阅状态"};
-        String[][] book = {{"11","aa","一","!","L1","已借出"},bookInformation};
 
-        table = new JTable(book,bookInformation);
+        books = search(conn);
+
+        table = new JTable(books,bookInformation)
+        {public boolean isCellEditable(int row, int column) {
+            return false;
+        }};
         JTableHeader head = table.getTableHeader();
         head.setFont(font);
+
+        table2 = new JTable(searchBorrowBook(conn,sID), new String[]{"书号", "借阅时间"})
+        {public boolean isCellEditable(int row, int column) {
+            return false;
+        }};
+        JTableHeader head2 = table2.getTableHeader();
+        head2.setFont(font);
+        table2.setFont(font);
+        table2.setRowHeight(25);
+        table2.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
         table.setFont(font);
         table.setRowHeight(25);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+        panel2.setLayout(null);
+        panel2.add(l6).setBounds(350,5,100,35);
+        panel2.add(head2).setBounds(5,50,777,35);
+        panel2.add(table2).setBounds(5,80,777,500);
 
         panel.add(head).setBounds(5,100,777,30);
         panel.add(table).setBounds(5,130,777,450);
@@ -142,6 +180,14 @@ public class LibraryFrame extends JFrame implements Login, ItemListener {
         blue.addItemListener(this);
         green.addItemListener(this);
         white.addItemListener(this);
+        //table事件
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                row = table.getSelectedRow();
+
+            }
+        });
 
         this.add(panel);
         this.setVisible(true);
@@ -150,40 +196,98 @@ public class LibraryFrame extends JFrame implements Login, ItemListener {
 
     }
 
-    public static void main(String[] args) {
-        new LibraryFrame();
-    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == search) {
-            JOptionPane.showMessageDialog(null, "查询成功！", "查询", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
-        }
-        if (e.getSource() == borrow) {
-            JOptionPane.showMessageDialog(null, "借阅成功！", "借阅", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
-        }
-        if (e.getSource() == borrowBook) {
-            
-        }
-        if (e.getSource() == returnBook) {
-            
-        }
-        if (e.getSource() == bookBorrowed) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            String url = "jdbc:mysql://localhost:3306/library";
+            String user = "root";
+            String password = "123456";
+            Connection conn = DriverManager.getConnection(url, user, password);
 
-        }
-        if (e.getSource() == information) {
+            if (e.getSource() == search) {
+                JOptionPane.showMessageDialog(null, "查询成功！", "查询", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
+            }
+            if (e.getSource() == borrow) {
+                if (row != -1) {
+                    if(borrowBook(conn,sID,books[row][0],borrowedNo)) {
+                        JOptionPane.showMessageDialog(null, "借阅成功！", "借阅", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
+                        row = -1;
+                        borrowedNo++;
+                        this.dispose();
+                        new LibraryFrame(sID,borrowedNo);
+                    }else{
+                        JOptionPane.showMessageDialog(null, "借阅失败！", "错误", JOptionPane.ERROR_MESSAGE);
+                    }
+                }else{
+                    JOptionPane.showMessageDialog(null, "请选择要借阅的图书！", "借阅", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+            if (e.getSource() == borrowBook) {
+                this.remove(panel2);
+                this.revalidate();
+                this.repaint();
+                this.add(panel);
+                this.revalidate();
+                this.repaint();
 
-        }
-        if (e.getSource() == changePassword) {
-            //JOptionPane.
+            }
+            if (e.getSource() == returnBook) {
+                if(borrowedNo > 0) {
+                    String returnBook = JOptionPane.showInputDialog(null,"请输入要归还的图书编号：","输入",JOptionPane.WARNING_MESSAGE);
+                    if(returnBook != null && !returnBook.isEmpty()) {
+                        if (returnBook(conn, sID, returnBook) != 0) {
+                            JOptionPane.showMessageDialog(null, "归还成功！", "还书", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
+                            borrowedNo--;
+                            this.dispose();
+                            new LibraryFrame(sID, borrowedNo);
+                        }else{
+                            JOptionPane.showMessageDialog(null, "请输入正确的图书编号！", "还书", JOptionPane.WARNING_MESSAGE);
 
-        }
-        if (e.getSource() == FileExit) {
-            int option = JOptionPane.showConfirmDialog(null,"您确认要退出吗？","退出系统",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
-            if(option == JOptionPane.OK_OPTION){System.exit(0);}
+                        }
+                    }
+                }else{
+                    JOptionPane.showMessageDialog(null, "暂无未归还图书！", "还书", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+            if (e.getSource() == bookBorrowed) {
+                this.remove(panel);
+                this.revalidate();
+                this.repaint();
+                this.add(panel2);
+                this.revalidate();
+                this.repaint();
 
-        }
+            }
+            if (e.getSource() == information) {
+                searchInformation(conn,sID);
 
+            }
+            if (e.getSource() == changePassword) {
+                String oldPassword = JOptionPane.showInputDialog(null,"原密码：","输入",JOptionPane.WARNING_MESSAGE);
+                if (oldPassword != null) {
+                    if(isStudentLogin(conn,sID,oldPassword)) {
+                        String newPassword = JOptionPane.showInputDialog(null, "新密码：", "输入", JOptionPane.WARNING_MESSAGE);
+                        if(newPassword != null) {
+                            studentChange(conn,sID,newPassword);
+                        }
+                    }else{
+                        JOptionPane.showMessageDialog(null,"密码错误","警告",JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+
+            }
+            if (e.getSource() == FileExit) {
+                int option = JOptionPane.showConfirmDialog(null,"您确认要注销吗？","退出系统",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
+                if(option == JOptionPane.OK_OPTION){
+                    this.dispose();
+                    new LoginFrame().setVisible(true);
+                }
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
@@ -209,7 +313,5 @@ public class LibraryFrame extends JFrame implements Login, ItemListener {
             table.setBackground(Color.white);
 
         }
-
-
     }
 }

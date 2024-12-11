@@ -51,7 +51,6 @@ public interface Login extends ActionListener {
         ans = rs.next();
         ps.close();
         rs.close();
-        conn.close();
         return ans;
     }
 
@@ -74,6 +73,31 @@ public interface Login extends ActionListener {
         ps.close();
         conn.close();
         JOptionPane.showMessageDialog(null, "修改成功！");
+    }
+    default int searchBorrowNo(Connection conn, String ID) throws Exception {
+        String sql = "select * from student where sID = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, ID);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        int a = rs.getInt("borrowed");
+        ps.close();
+        rs.close();
+        return a;
+    }
+    default void searchInformation(Connection conn,String sID) throws Exception {
+        String sql = "select * from student where sID = ? ";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1,sID);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        String id = rs.getString("sid");
+        String name = rs.getString("sName");
+        int borrowed = rs.getInt("Borrowed");
+        String password = rs.getString("Password");
+        JOptionPane.showMessageDialog(null, "姓名："+name+"\n账号："+id +"\n密码："+password+"\n借阅数量："+borrowed);
+        ps.close();
+        rs.close();
     }
 
 }
