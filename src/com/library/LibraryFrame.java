@@ -277,7 +277,7 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
 
             }
             if (e.getSource() == information) {
-                searchInformation(conn,sID);
+                searchInformation(conn,sID,true);
 
             }
             if (e.getSource() == changePassword) {

@@ -73,6 +73,7 @@ public interface EditBook extends ActionListener {
             throw new Exception(e.getMessage());
         }
     }
+
     default int returnBook(Connection conn, String sID, String isbn) throws Exception {
         try {
             int a = 0;
@@ -148,8 +149,68 @@ public interface EditBook extends ActionListener {
             books[i][5] = rs.getString("isBorrowed").equals("1") ? "已借出" : "未借出";
             i++;
         }
-
         return books;
+    }
 
+    default int addBook(Connection conn, String isbn, String bName, String bAuthor, String bPress, String bLocation) throws Exception {
+        try {
+            int a = 0;
+            String sql1 = "insert into book values(?,?,?,?,?,?); ;";
+            PreparedStatement ps = conn.prepareStatement(sql1);
+            ps.setString(1, isbn);
+            ps.setString(2, bName);
+            ps.setString(3, bAuthor);
+            ps.setString(4, bPress);
+            ps.setString(5, bLocation);
+            ps.setInt(6, 0);
+            a = ps.executeUpdate();
+            ps.close();
+
+            return a;
+        } catch(Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    default int updateBook(Connection conn, String isbn,String bName, String bAuthor, String bPress, String bLocation) throws Exception {
+        try {
+            int a = 0;
+            String sql1 = "update book set bName=?,bAuthor=?,bPress=?,bLocation=? where isbn = ? ;";
+            PreparedStatement ps = conn.prepareStatement(sql1);
+            ps.setString(1, bName);
+            ps.setString(2, bAuthor);
+            ps.setString(3, bPress);
+            ps.setString(4, bLocation);
+            ps.setString(5, isbn);
+            a = ps.executeUpdate();
+            ps.close();
+
+            return a;
+        } catch(Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    default boolean deleteBook(Connection conn,String isbn) throws Exception {
+        try {
+            String sql1 = "select isBorrowed from book where isbn = ? ;";
+            PreparedStatement ps = conn.prepareStatement(sql1);
+            ps.setString(1, isbn);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            int a = rs.getInt("isBorrowed");
+            if(a == 0) {
+                String sql2 = "DELETE FROM book WHERE isbn = ? ;";
+                PreparedStatement ps2 = conn.prepareStatement(sql2);
+                ps2.setString(1, isbn);
+                ps2.executeUpdate();
+                ps2.close();
+                return true;
+            }else{
+                return false;
+            }
+        } catch(Exception e) {
+            throw new Exception(e.getMessage());
+        }
     }
 }

@@ -71,8 +71,9 @@ public class LoginFrame extends JFrame implements Login{
                 String lpassword = Password.getText();
                 if (Admin.isSelected() && isAdminLogin(conn,lid,lpassword)) {
                     JOptionPane.showMessageDialog(null, "管理员登陆成功！","欢迎",JOptionPane.INFORMATION_MESSAGE,new ImageIcon("src/happy.png"));
+                    this.dispose();
+                    new AdminFrame(lid);
                 } else if (Student.isSelected() && isStudentLogin(conn,lid,lpassword)) {
-                    JOptionPane.showMessageDialog(null, "学生登陆成功！","欢迎",JOptionPane.INFORMATION_MESSAGE,new ImageIcon("src/happy.png"));
                     int borrowNo = searchBorrowNo(conn, lid);
                     this.dispose();
                     new LibraryFrame(lid,borrowNo);
