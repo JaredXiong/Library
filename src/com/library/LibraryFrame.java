@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Arrays;
 
 public class LibraryFrame extends JFrame implements Login, EditBook, ItemListener {
     JMenuBar menuBar = new JMenuBar();
@@ -277,7 +276,7 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
 
             }
             if (e.getSource() == information) {
-                searchInformation(conn,sID);
+                searchInformation(conn,sID,true);
 
             }
             if (e.getSource() == changePassword) {

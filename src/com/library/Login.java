@@ -1,12 +1,10 @@
 package com.library;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public interface Login extends ActionListener {
     //注册账号
@@ -85,17 +83,28 @@ public interface Login extends ActionListener {
         rs.close();
         return a;
     }
-    default void searchInformation(Connection conn,String sID) throws Exception {
-        String sql = "select * from student where sID = ? ";
+    default void searchInformation(Connection conn,String ID,boolean isStudent) throws Exception {
+        String sql;
+        if(isStudent){sql = "select * from student where sID = ? ";}
+        else{sql = "select * from admin where aID = ? ";}
         PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1,sID);
+        ps.setString(1,ID);
         ResultSet rs = ps.executeQuery();
         rs.next();
-        String id = rs.getString("sid");
-        String name = rs.getString("sName");
-        int borrowed = rs.getInt("Borrowed");
-        String password = rs.getString("Password");
-        JOptionPane.showMessageDialog(null, "姓名："+name+"\n账号："+id +"\n密码："+password+"\n借阅数量："+borrowed);
+
+        if(isStudent){
+            String id = rs.getString("sid");
+            String name = rs.getString("sName");
+            int borrowed = rs.getInt("Borrowed");
+            String password = rs.getString("Password");
+            JOptionPane.showMessageDialog(null, "姓名："+name+"\n账号："+id +"\n密码："+password+"\n借阅数量："+borrowed);
+        }
+        else {
+            String id = rs.getString("aid");
+            String name = rs.getString("aName");
+            String password = rs.getString("Password");
+            JOptionPane.showMessageDialog(null, "姓名：" + name + "\n账号：" + id + "\n密码：" + password);
+        }
         ps.close();
         rs.close();
     }
