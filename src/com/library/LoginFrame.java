@@ -19,7 +19,6 @@ public class LoginFrame extends JFrame implements Login{
     Label l2 = new Label("密码：");
     Label l3 = new Label("身份：");
 
-
     public LoginFrame() {
         this.setTitle("登陆");
         this.setSize(330,500);
@@ -51,12 +50,10 @@ public class LoginFrame extends JFrame implements Login{
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-
+    //项目唯一入口
     public static void main(String[] args) {
         new LoginFrame();
     }
-
-
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -70,7 +67,6 @@ public class LoginFrame extends JFrame implements Login{
                 String lid = ID.getText();
                 String lpassword = Password.getText();
                 if (Admin.isSelected() && isAdminLogin(conn,lid,lpassword)) {
-                    JOptionPane.showMessageDialog(null, "管理员登陆成功！","欢迎",JOptionPane.INFORMATION_MESSAGE,new ImageIcon("src/happy.png"));
                     this.dispose();
                     new AdminFrame(lid);
                 } else if (Student.isSelected() && isStudentLogin(conn,lid,lpassword)) {
@@ -84,12 +80,10 @@ public class LoginFrame extends JFrame implements Login{
             } else {
                 this.dispose();
                 new SignupFrame().setVisible(true);
-
             }
             conn.close();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-
     }
 }

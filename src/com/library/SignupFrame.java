@@ -53,7 +53,6 @@ public class SignupFrame extends JFrame implements Login {
         panel.add(Return).setBounds(160,385,60,35);
         SingUp.addActionListener(this);
         Return.addActionListener(this);
-
         this.add(panel);
         this.setVisible(true);
         this.setLocationRelativeTo(null);
@@ -88,13 +87,10 @@ public class SignupFrame extends JFrame implements Login {
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
-
             }
-
         }else{
             this.dispose();
             new LoginFrame().setVisible(true);
         }
-
     }
 }

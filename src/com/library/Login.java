@@ -72,6 +72,7 @@ public interface Login extends ActionListener {
         conn.close();
         JOptionPane.showMessageDialog(null, "修改成功！");
     }
+
     default int searchBorrowNo(Connection conn, String ID) throws Exception {
         String sql = "select * from student where sID = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
@@ -83,6 +84,7 @@ public interface Login extends ActionListener {
         rs.close();
         return a;
     }
+    
     default void searchInformation(Connection conn,String ID,boolean isStudent) throws Exception {
         String sql;
         if(isStudent){sql = "select * from student where sID = ? ";}

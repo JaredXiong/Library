@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class LibraryFrame extends JFrame implements Login, EditBook, ItemListener {
+    //定义成员属性
     JMenuBar menuBar = new JMenuBar();
     JMenu book = new JMenu("图书操作");
     JMenu color = new JMenu("主题颜色");
@@ -26,10 +27,10 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
     JTextField author = new JTextField(15);
     JTextField press = new JTextField(15);
     JTextField ISBN = new JTextField(15);
-    JRadioButton bName = new JRadioButton("按书名",true);
+    JRadioButton bName = new JRadioButton("按书名",false);
     JRadioButton bAuthor = new JRadioButton("按作者",false);
     JRadioButton bPress = new JRadioButton("按出版社",false);
-    JRadioButton bISBN = new JRadioButton("按书号",false);
+    JRadioButton bISBN = new JRadioButton("按书号",true);
     JButton search = new JButton("查询");
     JButton borrow = new JButton("借阅");
     Font font = new Font("仿宋", Font.BOLD, 20);
@@ -42,7 +43,6 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
     JTable table;
     String sID;
     int borrowedNo;
-
     JPanel panel2 = new JPanel();
     Label l6 = new Label("已借图书");
     JTable table2;
@@ -99,9 +99,7 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
         g1.add(green);
         g1.add(blue);
         g1.add(white);
-
-        this.setJMenuBar(menuBar);
-
+        this.setJMenuBar(menuBar);//添加菜单栏
         panel.setLayout(null);
         panel.add(l1).setBounds(5,5,60,35);
         panel.add(bookName).setBounds(70,5,110,35);
@@ -122,45 +120,37 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
         g2.add(bAuthor);
         g2.add(bPress);
         g2.add(bISBN);
-
         //获取数据
         Class.forName("com.mysql.cj.jdbc.Driver");
         String url = "jdbc:mysql://localhost:3306/library";
         String user = "root";
         String password = "123456";
         Connection conn = DriverManager.getConnection(url, user, password);
-
         //设计数据表
         String[] bookInformation = {"书号","书名","作者","出版社","存放位置","借阅状态"};
-
         books = search(conn);
-
         table = new JTable(books,bookInformation)
         {public boolean isCellEditable(int row, int column) {
             return false;
         }};
         JTableHeader head = table.getTableHeader();
         head.setFont(font);
-
         table2 = new JTable(searchBorrowBook(conn,sID), new String[]{"书号", "借阅时间"})
         {public boolean isCellEditable(int row, int column) {
             return false;
-        }};
+        }};//表格静止编辑
         JTableHeader head2 = table2.getTableHeader();
         head2.setFont(font);
         table2.setFont(font);
         table2.setRowHeight(25);
         table2.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-
         table.setFont(font);
         table.setRowHeight(25);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-
         panel2.setLayout(null);
         panel2.add(l6).setBounds(350,5,100,35);
         panel2.add(head2).setBounds(5,50,777,35);
         panel2.add(table2).setBounds(5,80,777,500);
-
         panel.add(head).setBounds(5,100,777,30);
         panel.add(table).setBounds(5,130,777,450);
         panel.add(borrow).setBounds(300,590,200,35);
@@ -187,14 +177,11 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
 
             }
         });
-
         this.add(panel);
         this.setVisible(true);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
     }
-
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -204,14 +191,12 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
             String user = "root";
             String password = "123456";
             Connection conn = DriverManager.getConnection(url, user, password);
-
+            //查询图书信息，支持多条件模糊查询
             if (e.getSource() == search) {
-                panel.remove(table);
-
+                panel.remove(table);//移除原有表格
                 books = queryBook(conn,ISBN.getText(), bookName.getText(), author.getText(), press.getText());
                 String[] bookInformation = {"书号","书名","作者","出版社","存放位置","借阅状态"};
-                System.out.println(books[0][0]);
-                JTable table3 = new JTable(books,bookInformation)
+                JTable table3 = new JTable(books,bookInformation)//将查询信息写入新表格
                 {public boolean isCellEditable(int row, int column) {
                     return false;
                 }};
@@ -219,10 +204,9 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
                 table3.setFont(font);
                 table3.setRowHeight(25);
                 table3.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-                panel.remove(table3);
-                panel.add(table3).setBounds(5,130,777,450);
+                panel.add(table3).setBounds(5,130,777,450);//将新表格加入窗体
                 table3.revalidate();
-                table3.repaint();
+                table3.repaint();//刷新窗体
             }
             if (e.getSource() == borrow) {
                 if (row != -1) {
@@ -273,11 +257,9 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
                 this.add(panel2);
                 this.revalidate();
                 this.repaint();
-
             }
             if (e.getSource() == information) {
                 searchInformation(conn,sID,true);
-
             }
             if (e.getSource() == changePassword) {
                 String oldPassword = JOptionPane.showInputDialog(null,"原密码：","输入",JOptionPane.WARNING_MESSAGE);
@@ -291,7 +273,6 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
                         JOptionPane.showMessageDialog(null,"密码错误","警告",JOptionPane.WARNING_MESSAGE);
                     }
                 }
-
             }
             if (e.getSource() == FileExit) {
                 int option = JOptionPane.showConfirmDialog(null,"您确认要注销吗？","退出系统",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
@@ -302,7 +283,6 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
             }
         } catch(java.lang.ArrayIndexOutOfBoundsException ae){
             JOptionPane.showMessageDialog(null,"查询为空！","警告",JOptionPane.WARNING_MESSAGE);
-
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -329,7 +309,6 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
             this.setBackground(Color.white);
             panel.setBackground(Color.white);
             table.setBackground(Color.white);
-
         }
     }
 }
