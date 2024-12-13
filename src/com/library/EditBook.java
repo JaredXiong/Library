@@ -53,7 +53,7 @@ public interface EditBook extends ActionListener {
         return books;
     }
     //借阅图书，借阅成功返回true
-    default boolean borrowBook(Connection conn, String sID, String isbn, int Borrowed) {
+    default void borrowBook(Connection conn, String sID, String isbn, int Borrowed) {
         try {
             String sql1 = "UPDATE book SET isBorrowed = 1 WHERE isbn = ? ;";
             String sql2 = "INSERT INTO borrow VALUES(?,?,?);";
@@ -76,35 +76,29 @@ public interface EditBook extends ActionListener {
             ps3.setString(2, sID);
             ps3.executeUpdate();
             ps3.close();
-            return true;
+
         } catch(Exception e) {
-            return false;
+            throw new RuntimeException();
         }
     }
     //归还图书，归还成功返回true
-    default boolean returnBook(Connection conn, String sID, String isbn) throws Exception {
+    default void returnBook(Connection conn, String sID, String isbn) throws Exception {
         try {
-            int a = 0;
             String sql1 = "UPDATE book SET isBorrowed = 0 WHERE isbn = ? ;";
             String sql2 = "DELETE FROM borrow WHERE isbn = ? ;";
             String sql3 = "UPDATE student SET borrowed = borrowed-1  WHERE sID = ? ;";
             PreparedStatement ps1 = conn.prepareStatement(sql1);
             ps1.setString(1, isbn);
-            a += ps1.executeUpdate();
+            ps1.executeUpdate();
             ps1.close();
-            if(a != 0) {
-                PreparedStatement ps2 = conn.prepareStatement(sql2);
-                ps2.setString(1, isbn);
-                ps2.executeUpdate();
-                ps2.close();
-
-                PreparedStatement ps3 = conn.prepareStatement(sql3);
-                ps3.setString(1, sID);
-                ps3.executeUpdate();
-                ps3.close();
-                return true;
-            }
-            return false;
+            PreparedStatement ps2 = conn.prepareStatement(sql2);
+            ps2.setString(1, isbn);
+            ps2.executeUpdate();
+            ps2.close();
+            PreparedStatement ps3 = conn.prepareStatement(sql3);
+            ps3.setString(1, sID);
+            ps3.executeUpdate();
+            ps3.close();
         } catch(Exception e) {
             throw new Exception(e.getMessage());
         }
@@ -208,5 +202,15 @@ public interface EditBook extends ActionListener {
         } catch(Exception e) {
             throw new Exception(e.getMessage());
         }
+    }
+    default boolean isBorrowBook(Connection conn,String isbn) throws Exception {
+        String sql = "select isBorrowed from book WHERE isbn = ? ;";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, isbn);
+        ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        int a = rs.getInt("isBorrowed");
+        return a != 0;
     }
 }

@@ -222,14 +222,16 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
             }
             if (e.getSource() == borrow) {
                 if (row != -1) {
-                    if(borrowBook(conn,sID,books[row][0],borrowedNo)) {
+                    if(isBorrowBook(conn,books[row][0])) {
+                        JOptionPane.showMessageDialog(null, "图书已被借出！", "错误", JOptionPane.ERROR_MESSAGE);
+                        row = -1;
+                    }else{
+                        borrowBook(conn,sID,books[row][0],borrowedNo);
                         JOptionPane.showMessageDialog(null, "借阅成功！", "借阅", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
                         row = -1;
                         borrowedNo++;
                         this.dispose();
                         new LibraryFrame(sID,borrowedNo);
-                    }else{
-                        JOptionPane.showMessageDialog(null, "借阅失败！", "错误", JOptionPane.ERROR_MESSAGE);
                     }
                 }else{
                     JOptionPane.showMessageDialog(null, "请选择要借阅的图书！", "借阅", JOptionPane.WARNING_MESSAGE);
@@ -247,7 +249,8 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
                 if(borrowedNo > 0) {
                     String returnBook = JOptionPane.showInputDialog(null,"请输入要归还的图书编号：","输入",JOptionPane.WARNING_MESSAGE);
                     if(returnBook != null && !returnBook.isEmpty()) {
-                        if (returnBook(conn, sID, returnBook)) {
+                        if (isBorrowBook(conn,books[row2][0])) {
+                            returnBook(conn, sID, returnBook);
                             JOptionPane.showMessageDialog(null, "归还成功！", "还书", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
                             borrowedNo--;
                             this.dispose();
@@ -262,7 +265,8 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
             }
             if(e.getSource() == rBook) {
                 if (row2 != -1) {
-                    if(returnBook(conn,sID,books[row2][0])) {
+                    if(isBorrowBook(conn,books[row2][0])) {
+                        returnBook(conn,sID,books[row2][0]);
                         JOptionPane.showMessageDialog(null, "归还成功！", "还书", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
                         row2 = -1;
                         borrowedNo--;
