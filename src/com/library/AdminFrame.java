@@ -29,6 +29,7 @@ public class AdminFrame extends JFrame implements Login, EditBook, ItemListener 
     JTable table;
     String[][] books;
     String[] bookInformation = {"书号","书名","作者","出版社","存放位置","借阅状态"};
+    String[] bookDB = {"isbn","bName","bAuthor","bPress","bLocation"};
     int row = -1;
     int column = -1;
     //内部类，通过button点击事件弹出弹窗
@@ -242,7 +243,7 @@ public class AdminFrame extends JFrame implements Login, EditBook, ItemListener 
                     }else{
                         String newThing = JOptionPane.showInputDialog(null, "新信息：", "修改图书", JOptionPane.WARNING_MESSAGE);
                         if(newThing != null && !newThing.isEmpty()){
-                            updateBook(conn,books[row][0],bookInformation[column],newThing);
+                            updateBook(conn,books[row][0],bookDB[column],newThing);
                             this.dispose();
                             new AdminFrame(aID);
                         }else{

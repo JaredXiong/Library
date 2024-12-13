@@ -30,18 +30,24 @@ public interface EditBook extends ActionListener {
     }
     //查找所有借阅信息，返回二维数组
     default String[][] searchBorrowBook(Connection conn, String sID) throws Exception {
-        String sql = "SELECT * FROM borrow WHERE bID = ? ";
+        String sql = "SELECT * FROM borrow LEFT JOIN library.book b on b.isbn = borrow.isbn WHERE bID = ? ";
+
         PreparedStatement ps = conn.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
         ps.setString(1,sID);
         ResultSet rs = ps.executeQuery();
         rs.last();
         int rsRow = rs.getRow();
-        String[][] books = new String[rsRow][2];
+        String[][] books = new String[rsRow][6];
         rs.beforeFirst();
         int i = 0;
         while(rs.next()){
             books[i][0] = rs.getString("isbn");
-            books[i][1] = rs.getString("bTime");
+            books[i][1] = rs.getString("bName");
+            books[i][2] = rs.getString("bAuthor");
+            books[i][3] = rs.getString("bPress");
+            books[i][4] = rs.getString("bLocation");
+            books[i][5] = rs.getString("bTime");
+
             i++;
         }
         return books;
@@ -75,8 +81,8 @@ public interface EditBook extends ActionListener {
             return false;
         }
     }
-    //归还图书，返回归还数量
-    default int returnBook(Connection conn, String sID, String isbn) throws Exception {
+    //归还图书，归还成功返回true
+    default boolean returnBook(Connection conn, String sID, String isbn) throws Exception {
         try {
             int a = 0;
             String sql1 = "UPDATE book SET isBorrowed = 0 WHERE isbn = ? ;";
@@ -89,15 +95,16 @@ public interface EditBook extends ActionListener {
             if(a != 0) {
                 PreparedStatement ps2 = conn.prepareStatement(sql2);
                 ps2.setString(1, isbn);
-                a += ps2.executeUpdate();
+                ps2.executeUpdate();
                 ps2.close();
 
                 PreparedStatement ps3 = conn.prepareStatement(sql3);
                 ps3.setString(1, sID);
-                a += ps3.executeUpdate();
+                ps3.executeUpdate();
                 ps3.close();
+                return true;
             }
-            return a;
+            return false;
         } catch(Exception e) {
             throw new Exception(e.getMessage());
         }
@@ -167,13 +174,14 @@ public interface EditBook extends ActionListener {
     //修改图书，无返回值
     default void updateBook(Connection conn, String isbn, String field, String newThing) throws Exception {
         try {
-            String sql1 = "UPDATE book SET ? = ? WHERE isbn = ? ;";
-            PreparedStatement ps = conn.prepareStatement(sql1);
-            ps.setString(1, field);
-            ps.setString(2, newThing);
-            ps.setString(3, isbn);
-            ps.executeUpdate();
-            ps.close();
+            if(field != null && !field.isEmpty()) {
+                PreparedStatement ps = conn.prepareStatement("UPDATE book SET ? = ? WHERE isbn = ? ;");
+                ps.setString(1, field);
+                ps.setString(2, newThing);
+                ps.setString(3, isbn);
+                ps.executeUpdate();
+                ps.close();
+            }
         } catch(Exception e) {
             throw new Exception(e.getMessage());
         }

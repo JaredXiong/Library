@@ -41,12 +41,14 @@ CREATE TABLE borrow
     FOREIGN KEY (bID) REFERENCES student(sID)
 
 );
-
-INSERT INTO student VALUE('张三','123456',1,123456);
-
-INSERT INTO book VALUE('9787508678498','历史的温度','张玮','中信出版社','历史1-1',0),
-    ('9787115293800','算法','Robert Sedgewick/Kevin Wayne','人民邮电出版社','计算机',1)
+#测试用例
+INSERT INTO book VALUE('9787508678498','历史的温度','张玮','中信出版社','历史1排1层',0),
+    ('9787115293800','算法','Robert Sedgewick/Kevin Wayne','人民邮电出版社','计算机6排8层',1),
+    ('10015','Just For Fun','LinusTorvalds','人民邮电出版社','计算机3排5层',0),
+    ('12001','Fancifulness','Hans Rosling','文汇出版社','文学2排6层',0),
+    ('78912','Java程序设计','刘晓明、周亚辉','东北大学出版社','计算机2排3层',0)
 ;
-INSERT INTO borrow VALUE('9787115293800','123456','2024-12-10');
+INSERT INTO student VALUE('张三','345',1,123456);
+INSERT INTO borrow VALUE('9787115293800','345','2024-12-10');
+INSERT INTO admin VALUES('李四','123','123');
 
-select * from book where bName like '%算%' ;

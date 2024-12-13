@@ -33,6 +33,7 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
     JRadioButton bISBN = new JRadioButton("按书号",true);
     JButton search = new JButton("查询");
     JButton borrow = new JButton("借阅");
+    JButton rBook = new JButton("归还");
     Font font = new Font("仿宋", Font.BOLD, 20);
     Label l1 = new Label("书名：");
     Label l2 = new Label("作者：");
@@ -48,6 +49,7 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
     JTable table2;
     String[][] books;
     int row = -1;
+    int row2 = -1;
 
     public LibraryFrame(String ID, int borrowed) throws Exception {
         sID = ID;
@@ -74,6 +76,7 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
         bISBN.setFont(font);
         search.setFont(font);
         borrow.setFont(font);
+        rBook.setFont(font);
         l1.setFont(font);
         l2.setFont(font);
         l3.setFont(font);
@@ -135,10 +138,10 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
         }};
         JTableHeader head = table.getTableHeader();
         head.setFont(font);
-        table2 = new JTable(searchBorrowBook(conn,sID), new String[]{"书号", "借阅时间"})
+        table2 = new JTable(searchBorrowBook(conn,sID), new String[]{"书号","书名","作者","出版社","存放位置","借阅时间"})
         {public boolean isCellEditable(int row, int column) {
             return false;
-        }};//表格静止编辑
+        }};//表格禁止编辑
         JTableHeader head2 = table2.getTableHeader();
         head2.setFont(font);
         table2.setFont(font);
@@ -151,12 +154,14 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
         panel2.add(l6).setBounds(350,5,100,35);
         panel2.add(head2).setBounds(5,50,777,35);
         panel2.add(table2).setBounds(5,80,777,500);
+        panel2.add(rBook).setBounds(300,590,200,35);
         panel.add(head).setBounds(5,100,777,30);
         panel.add(table).setBounds(5,130,777,450);
         panel.add(borrow).setBounds(300,590,200,35);
         //Button事件
         search.addActionListener(this);
         borrow.addActionListener(this);
+        rBook.addActionListener(this);
         //Menu事件
         borrowBook.addActionListener(this);
         returnBook.addActionListener(this);
@@ -173,8 +178,15 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
                 row = table.getSelectedRow();
-
+            }
+        });
+        table2.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                row2 = table2.getSelectedRow();
             }
         });
         this.add(panel);
@@ -230,24 +242,37 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
                 this.add(panel);
                 this.revalidate();
                 this.repaint();
-
             }
             if (e.getSource() == returnBook) {
                 if(borrowedNo > 0) {
                     String returnBook = JOptionPane.showInputDialog(null,"请输入要归还的图书编号：","输入",JOptionPane.WARNING_MESSAGE);
                     if(returnBook != null && !returnBook.isEmpty()) {
-                        if (returnBook(conn, sID, returnBook) != 0) {
+                        if (returnBook(conn, sID, returnBook)) {
                             JOptionPane.showMessageDialog(null, "归还成功！", "还书", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
                             borrowedNo--;
                             this.dispose();
                             new LibraryFrame(sID, borrowedNo);
                         }else{
                             JOptionPane.showMessageDialog(null, "请输入正确的图书编号！", "还书", JOptionPane.WARNING_MESSAGE);
-
                         }
                     }
                 }else{
                     JOptionPane.showMessageDialog(null, "暂无未归还图书！", "还书", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+            if(e.getSource() == rBook) {
+                if (row2 != -1) {
+                    if(returnBook(conn,sID,books[row2][0])) {
+                        JOptionPane.showMessageDialog(null, "归还成功！", "还书", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
+                        row2 = -1;
+                        borrowedNo--;
+                        this.dispose();
+                        new LibraryFrame(sID, borrowedNo);
+                    }else{
+                        JOptionPane.showMessageDialog(null, "归还失败！", "错误", JOptionPane.ERROR_MESSAGE);
+                    }
+                }else{
+                    JOptionPane.showMessageDialog(null, "请选择要归还的图书！", "还书", JOptionPane.WARNING_MESSAGE);
                 }
             }
             if (e.getSource() == bookBorrowed) {
