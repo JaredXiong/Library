@@ -168,10 +168,9 @@ public interface EditBook extends ActionListener {
     default void updateBook(Connection conn, String isbn, String field, String newThing) throws Exception {
         try {
             if(field != null && !field.isEmpty()) {
-                PreparedStatement ps = conn.prepareStatement("UPDATE book SET ? = ? WHERE isbn = ? ;");
-                ps.setString(1, field);
-                ps.setString(2, newThing);
-                ps.setString(3, isbn);
+                PreparedStatement ps = conn.prepareStatement("UPDATE book SET " + field + " = ? WHERE isbn = ? ;");
+                ps.setString(1, newThing);
+                ps.setString(2, isbn);
                 ps.executeUpdate();
                 ps.close();
             }
