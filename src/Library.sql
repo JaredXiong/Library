@@ -36,7 +36,7 @@ CREATE TABLE borrow
 (
     isbn VARCHAR(255) NOT NULL,#借阅图书
     bID VARCHAR(255) NOT NULL ,#借阅人
-    bTime DATE NOT NULL,#归还时间
+    bTime DATE NOT NULL,#借阅时间
     FOREIGN KEY (isbn) REFERENCES book(isbn),
     FOREIGN KEY (bID) REFERENCES student(sID)
 
