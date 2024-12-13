@@ -48,6 +48,7 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
     Label l6 = new Label("已借图书");
     JTable table2;
     String[][] books;
+    String[][] BorrowBooks;
     int row = -1;
     int row2 = -1;
 
@@ -138,7 +139,8 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
         }};
         JTableHeader head = table.getTableHeader();
         head.setFont(font);
-        table2 = new JTable(searchBorrowBook(conn,sID), new String[]{"书号","书名","作者","出版社","存放位置","借阅时间"})
+        BorrowBooks = searchBorrowBook(conn,sID);
+        table2 = new JTable(BorrowBooks, new String[]{"书号","书名","作者","出版社","存放位置","借阅时间"})
         {public boolean isCellEditable(int row, int column) {
             return false;
         }};//表格禁止编辑
@@ -208,17 +210,17 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
                 panel.remove(table);//移除原有表格
                 books = queryBook(conn,ISBN.getText(), bookName.getText(), author.getText(), press.getText());
                 String[] bookInformation = {"书号","书名","作者","出版社","存放位置","借阅状态"};
-                JTable table3 = new JTable(books,bookInformation)//将查询信息写入新表格
+                table = new JTable(books,bookInformation)//将查询信息写入新表格
                 {public boolean isCellEditable(int row, int column) {
                     return false;
                 }};
-                table3.updateUI();
-                table3.setFont(font);
-                table3.setRowHeight(25);
-                table3.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-                panel.add(table3).setBounds(5,130,777,450);//将新表格加入窗体
-                table3.revalidate();
-                table3.repaint();//刷新窗体
+                table.updateUI();
+                table.setFont(font);
+                table.setRowHeight(25);
+                table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+                panel.add(table).setBounds(5,130,777,450);//将新表格加入窗体
+                table.revalidate();
+                table.repaint();//刷新窗体
             }
             if (e.getSource() == borrow) {
                 if (row != -1) {
@@ -247,10 +249,11 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
             }
             if (e.getSource() == returnBook) {
                 if(borrowedNo > 0) {
+                    //询问弹窗，获取用户归还图书信息
                     String returnBook = JOptionPane.showInputDialog(null,"请输入要归还的图书编号：","输入",JOptionPane.WARNING_MESSAGE);
-                    if(returnBook != null && !returnBook.isEmpty()) {
-                        if (isBorrowBook(conn,books[row2][0])) {
-                            returnBook(conn, sID, returnBook);
+                    if(returnBook != null && !returnBook.isEmpty()) {//判断输入不为空
+                        if (isBorrowBook(conn, returnBook)) {//判断图书是否借出
+                            returnBook(conn, sID, returnBook);//归还操作
                             JOptionPane.showMessageDialog(null, "归还成功！", "还书", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
                             borrowedNo--;
                             this.dispose();
@@ -264,9 +267,9 @@ public class LibraryFrame extends JFrame implements Login, EditBook, ItemListene
                 }
             }
             if(e.getSource() == rBook) {
-                if (row2 != -1) {
-                    if(isBorrowBook(conn,books[row2][0])) {
-                        returnBook(conn,sID,books[row2][0]);
+                if (row2 != -1) {//判断点击操作
+                    if(isBorrowBook(conn,BorrowBooks[row2][0])) {//判断图书是否借出
+                        returnBook(conn,sID,BorrowBooks[row2][0]);//归还操作
                         JOptionPane.showMessageDialog(null, "归还成功！", "还书", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("src/happy.png"));
                         row2 = -1;
                         borrowedNo--;

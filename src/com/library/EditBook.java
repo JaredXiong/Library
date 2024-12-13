@@ -47,7 +47,6 @@ public interface EditBook extends ActionListener {
             books[i][3] = rs.getString("bPress");
             books[i][4] = rs.getString("bLocation");
             books[i][5] = rs.getString("bTime");
-
             i++;
         }
         return books;
@@ -204,7 +203,7 @@ public interface EditBook extends ActionListener {
         }
     }
     default boolean isBorrowBook(Connection conn,String isbn) throws Exception {
-        String sql = "select isBorrowed from book WHERE isbn = ? ;";
+        String sql = "select * from book WHERE isbn = ? ;";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setString(1, isbn);
         ps.executeQuery();
